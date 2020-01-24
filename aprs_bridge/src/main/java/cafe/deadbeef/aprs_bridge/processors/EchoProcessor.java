@@ -14,7 +14,7 @@ import net.ab0oo.aprs.parser.InformationField;
 import net.ab0oo.aprs.parser.MessagePacket;
 
 @Component
-public class EchoProcessor implements ApplicationListener<AprsMessageEvent> {
+public class EchoProcessor extends AbstractProcessor {
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
