@@ -25,10 +25,12 @@ public class EchoProcessor extends AbstractProcessor {
 
 	@Override
 	public void onApplicationEvent(AprsMessageEvent event) {
-		if ( event.getPacket().getDestinationCall().equals(keyword) && !event.getPacket().getSourceCall().equals(keyword) ) {
+		// Check that the message is for us, isn't from us (to prevent loops) and isn't either an ack or rej packet
+		if ( event.getMessagePacket().getTargetCallsign().equals(keyword) && !event.getPacket().getSourceCall().equals(keyword) && !event.getMessagePacket().isAck() && !event.getMessagePacket().isRej() ) {
 			logger.info(String.format("(%s >%s> %s) %s", event.getPacket().getSourceCall(), event.getPacket().getDti(), event.getPacket().getDestinationCall(), ((MessagePacket)event.getPacket().getAprsInformation()).getMessageBody()));
 			
 			// Construct the response
+			logger.info("Sending response...");
 			
 			// Send an ack first
 			InformationField ackInfo = new MessagePacket(event.getPacket().getSourceCall(), "ack", event.getMessagePacket().getMessageNumber());
@@ -36,7 +38,6 @@ public class EchoProcessor extends AbstractProcessor {
 			applicationEventPublisher.publishEvent(new AprsPacketEvent(this, ackResponse));
 			
 			// Now send the actual message
-			logger.info("Building response packet...");
 			InformationField info = new MessagePacket(event.getPacket().getSourceCall(), event.getMessagePacket().getMessageBody(), "1");
 			APRSPacket response = new APRSPacket(keyword, event.getPacket().getSourceCall(), null, info);
 			applicationEventPublisher.publishEvent(new AprsPacketEvent(this, response));

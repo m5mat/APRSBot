@@ -106,7 +106,7 @@ public class AprsClient implements ApplicationListener<AprsPacketEvent> {
 								break;
 							case ':':
 								// Message
-								logger.debug(String.format("(%s >%s> %s) %s", packet.getSourceCall(), packet.getDti(), packet.getDestinationCall(), ((MessagePacket)packet.getAprsInformation()).getMessageBody()));
+								logger.debug(String.format("(%s >%s> %s) %s", packet.getSourceCall(), packet.getDti(), ((MessagePacket)packet.getAprsInformation()).getTargetCallsign(), ((MessagePacket)packet.getAprsInformation()).getMessageBody()));
 								applicationEventPublisher.publishEvent(new AprsMessageEvent(this, packet));
 								break;
 							

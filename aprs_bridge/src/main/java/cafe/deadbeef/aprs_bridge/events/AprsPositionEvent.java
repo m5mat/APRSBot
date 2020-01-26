@@ -18,7 +18,7 @@ public class AprsPositionEvent extends ApplicationEvent {
 			return this.packet;
 		}
 		
-		public PositionPacket getPositionPackett() {
+		public PositionPacket getPositionPacket() {
 			return (PositionPacket) this.packet.getAprsInformation();
 		}
 
