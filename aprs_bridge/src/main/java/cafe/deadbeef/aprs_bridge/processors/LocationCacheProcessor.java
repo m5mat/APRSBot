@@ -28,12 +28,20 @@ public class LocationCacheProcessor implements ApplicationListener<AprsPositionE
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
+    @Override
 	public void onApplicationEvent(AprsPositionEvent event) {
-		locationCache.put(event.getPacket().getSourceCall(), event.getPositionPacket().getPosition());
+    	this.setPosition(event.getPacket().getSourceCall(), event.getPositionPacket().getPosition());
 	}
 	
 	public void setPosition(String callsign, Position position) {
 		this.locationCache.put(callsign, position);
+		if ( this.locationCache.size() % 100 == 0 ) {
+			String additionalInfo = "";
+			if ( this.locationCache.containsKey("M5MAT") ) {
+				additionalInfo = "*";
+			}
+			logger.info(String.format("Location Cache size: %d %s", this.locationCache.size(), additionalInfo));
+		}
 	}
 
 	public Position getPosition(String callsign) {

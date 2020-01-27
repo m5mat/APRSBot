@@ -25,14 +25,12 @@ public class LocationCacheManualUpdateProcessor extends AbstractProcessor {
 	private String keyword = "POSN";	// This is the callsign used to allow non-GPS stations to update their location
 	
 	public void onApplicationEvent(AprsMessageEvent event) {
+		
 		// Take position updates by message for non-GPS stations
-		
-		logger.debug("Processing message");
-		
 		if ( event.getMessagePacket().getTargetCallsign().equals(this.keyword) ) {
-			if ( event.getMessagePacket().getMessageBody().equals("?") ) {
+			if ( event.getMessagePacket().getMessageBody().toUpperCase().equals("WHERE AM I") ) {
 				// Tell the user what their position is, according to us
-				
+				logger.info(String.format("Letting %s know where they are (%s)", event.getPacket().getSourceCall(), locationCacheProcessor.getPosition(event.getPacket().getSourceCall()).toDecimalString()));
 				// Send an ack first
 				InformationField ackInfo = new MessagePacket(event.getPacket().getSourceCall(), "ack", event.getMessagePacket().getMessageNumber());
 				APRSPacket ackResponse = new APRSPacket(keyword, event.getPacket().getSourceCall(), null, ackInfo);
@@ -46,14 +44,19 @@ public class LocationCacheManualUpdateProcessor extends AbstractProcessor {
 			
 				// TODO: Make this capable of handling Maidenhead Grids
 			
-				String[] positionParts = event.getMessagePacket().getMessageBody().split(" ");
+				String[] positionParts = event.getMessagePacket().getMessageBody().split(",|\\s");
 				
 				locationCacheProcessor.setPosition(event.getPacket().getSourceCall(), new Position(
 						Double.parseDouble(positionParts[0]),
 						Double.parseDouble(positionParts[1])
 				));
 				
-				logger.debug(String.format("Stored position for %s (%s)", event.getPacket().getSourceCall(), locationCacheProcessor.getPosition(event.getPacket().getSourceCall()).toString()));
+				// Send an ack
+				InformationField ackInfo = new MessagePacket(event.getPacket().getSourceCall(), "ack", event.getMessagePacket().getMessageNumber());
+				APRSPacket ackResponse = new APRSPacket(keyword, event.getPacket().getSourceCall(), null, ackInfo);
+				applicationEventPublisher.publishEvent(new AprsPacketEvent(this, ackResponse));
+				
+				logger.debug(String.format("Stored position for %s (%s)", event.getPacket().getSourceCall(), locationCacheProcessor.getPosition(event.getPacket().getSourceCall()).toDecimalString()));
 			
 			}
 		}	

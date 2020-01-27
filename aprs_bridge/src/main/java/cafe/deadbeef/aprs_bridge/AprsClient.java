@@ -100,6 +100,7 @@ public class AprsClient implements ApplicationListener<AprsPacketEvent> {
 							case '=':
 							case '\'':
 							case '`':
+							case '$':
 								// Position
 								logger.debug(String.format("(%s >%s> %s) %.3f, %.3f", packet.getSourceCall(), packet.getDti(), packet.getDestinationCall(), ((PositionPacket)packet.getAprsInformation()).getPosition().getLatitude(), ((PositionPacket)packet.getAprsInformation()).getPosition().getLongitude()));
 								applicationEventPublisher.publishEvent(new AprsPositionEvent(this, packet));
@@ -117,8 +118,8 @@ public class AprsClient implements ApplicationListener<AprsPacketEvent> {
 							}
 							
 						} catch (Exception e) {
-							logger.error("Oops, exception thrown!", e);
-							e.printStackTrace();
+							// logger.error("Oops, exception thrown!", e);
+							// e.printStackTrace();
 						}
 					}
 					Thread.sleep(100);
@@ -153,7 +154,7 @@ public class AprsClient implements ApplicationListener<AprsPacketEvent> {
 				this.getPasscode(username), 
 				//this.getRangeFilter(51.92, -2.1, 50)
 				//this.getTypeFilter(new String[] {"Status"})
-				this.getTypeFilter(new String[] {"Message"})
+				this.getTypeFilter(new String[] {"Message", "Position"})
 		);
 	}
 	
